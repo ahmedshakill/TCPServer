@@ -1,4 +1,5 @@
-#define __WIN32_WINNT 0xA0000006
+#define _WIN32_WINNT 0xA000006
+
 #include <iostream>
 #include <boost/beast/core.hpp>
 #include <boost/beast/http.hpp>
