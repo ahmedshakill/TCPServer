@@ -53,20 +53,19 @@ public:
 		//			std::cout << ec.message() << std::endl;
 		//			/*throw boost::system::system_error{ ec };*/
 		//		}
-
 		//	});
 	};
 private:
 
 	void perform_ssl_handshake()
 	{
-		//beast::get_lowest_layer(stream_).expires_after(std::chrono::seconds(30));
+		beast::get_lowest_layer(stream_).expires_after(std::chrono::seconds(30));
 		stream_.async_handshake(ssl::stream_base::server, 
 				[self=shared_from_this()](error_code ec) 
 				{
 				self->ec = ec;
 				if (ec) {
-					std::cout << "error handshake\n";
+					//std::cout << "error handshake\n";
 				}
 				else {
 					self->read_client();
@@ -78,17 +77,18 @@ private:
 	void read_client()
 	{
 		try{
-			std::cout << "Reading Client\n";
+;			std::cout << "Reading Client\n";
 			request_ = {};
-			http::async_read(stream_,streambuf_,request_, [self=shared_from_this()](error_code ec,std::size_t bytes_transferred) {
+			http::async_read(stream_,flatbuf_,request_, [self=shared_from_this()](error_code ec,std::size_t bytes_transferred) {
 					self->ec = ec;
-					std::cout << self->request_<<" "<<bytes_transferred;
+					//std::cout << self->request_<<" "<<bytes_transferred;
+					self->handle_read();
 					self->write_client();
 				});
 		}
 		catch (const boost::system::system_error& ec)
 		{
-			std::cout << "\n\nstart_accept: " << ec.what();
+			//std::cout << "\n\nstart_accept: " << ec.what();
 			if (ec.code() == boost::asio::error::connection_aborted)
 			{
 				
@@ -96,12 +96,24 @@ private:
 		}
 	}
 
+	void handle_read()
+	{
+		std::cout<<request_.target();
+	}
+
+	void handle_write()
+	{
+
+	}
+
 	void write_client()
 	{
 		try {
-			std::cout << "\n\nwriting\n\n";
+			std::cout << "\nwriting\n";
 			http::string_body::value_type body;
-			body.append("<html><body>hello world</body></html>");
+			body.append("<html><body>hello world<a href=""https://www.w3schools.com"">Visit W3Schools</a>\
+								<input type=""text"" id=""name:"" name=""name"" required\
+								minlength = ""4"" maxlength = ""8"" size = ""10"" > </body></html>");
 			auto const size = body.size();
 			http::response<http::string_body> res_{
 			std::piecewise_construct,
@@ -111,28 +123,28 @@ private:
 			res_.set(http::field::content_type, "text / html");
 			res_.content_length(size);
 			res_.keep_alive(request_.keep_alive());
-			/*http::async_write(stream_, res_, [self = shared_from_this()](error_code ec,std::size_t bytes_transferred)
-			{
-				self->read_client();
-			});*/
-		
-			http::write(stream_, res_);
-			read_client();
+			
+			http::write(stream_, res_, ec);
+			/*http::async_write(stream_, res_, [self=shared_from_this()](error_code ec,std::size_t bytes_transferred) {
+					
+					self -> ec = ec;
+					self->read_client();
+				});*/
 		}
 		catch (const boost::system::system_error& ec)
 		{
-			std::cout << "\n\nstart_accept: " << ec.what();
+			std::cout << "\nstart_accept: " << ec.what();
 		}
 		catch (const std::exception& e)
 		{
 			
-			std::cout << "\n\n sfskladf " << e.what();
+			std::cout << "\nsfskladf " << e.what();
 		}
 	}
 	
 private:
-	beast::flat_buffer streambuf_;
-	error_code ec;
+	beast::flat_buffer flatbuf_;
+	boost::beast::error_code ec;
 	beast::ssl_stream<beast::tcp_stream>stream_;
 	http::request<http::string_body> request_;
 };
@@ -158,16 +170,15 @@ public:
 	void start_accept()
 	{
 		// The new connection gets its own strand
-		//socket.emplace(io::make_strand(io_context_));
-		//std::shared_ptr<tcp::socket> pSocket(new tcp::socket(io::make_strand(io_context_)));
+		/*socket.emplace(io::make_strand(io_context_));*/
+		//std::shared_ptr<tcp::socket> socket(new tcp::socket(io::make_strand(io_context_)));
 		acceptor_.async_accept(
-			[self=shared_from_this()](error_code ec,tcp::socket&& pSocket) {
+			[self=shared_from_this()](error_code ec,tcp::socket&& socket) {
 			check("error accepting connection\n")
-			std::cout << "\nnew connection\n";
-			
+			//std::cout << "\nnew connection\n";
 			try
 			{
-				 std::make_shared<session>(self->ctx_, std::move(pSocket))->serve_client(); 
+				std::make_shared<session>(self->ctx_, std::move((socket)))->serve_client(); 
 				self->start_accept();
 			}
 			catch (const error_code &ec)
@@ -182,7 +193,7 @@ private:
 	ssl::context ctx_{ ssl::context::tlsv13 };
 	tcp::acceptor acceptor_;
 	tcp::endpoint endpoint_{ io::ip::make_address("127.0.0.1"),8080 };
-	std::optional<tcp::socket> socket;
+	//std::optional<tcp::socket> socket;
 };
 
 int main(int argc, char* argv[])
