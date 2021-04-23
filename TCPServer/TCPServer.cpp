@@ -12,8 +12,8 @@
 #include <boost/exception/all.hpp>
 #include <boost/filesystem.hpp>
 #include "server_certificate.hpp"
-#include "json.hpp"
-#include "inja.hpp"
+//#include "json.hpp"
+//#include "inja.hpp"
 
 //using namespace std;
 namespace io = boost::asio;
