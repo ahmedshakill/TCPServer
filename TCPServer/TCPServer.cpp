@@ -84,8 +84,13 @@ private:
 			http::async_read(stream_,flatbuf_,request_, [self=shared_from_this()](error_code ec,std::size_t bytes_transferred) {
 					self->ec = ec;
 					//std::cout << self->request_<<" "<<bytes_transferred;
+					if (ec == http::error::end_of_stream)
+					{
+						
+
+					}
 					self->handle_read();
-					self->write_client();
+					//self->write_client();
 				});
 		}
 		catch (const boost::system::system_error& ec)
@@ -100,7 +105,48 @@ private:
 
 	void handle_read()
 	{
-		std::cout<<request_.target();
+
+		switch (request_.method())
+		{			
+			case http::verb::get:
+				{
+					std::cout << "GET request!";
+					//handle_get();
+					
+
+					break;
+				};
+			case http::verb::post:
+				{
+					std::cout << "POST request!";
+					handle_post();
+					break;
+				};
+			case http::verb::put:
+				{
+					std::cout << "POST request!";
+					handle_put();
+					break;
+				};
+			default :
+				break;
+		}
+		write_client();
+	}
+
+	void handle_get()
+	{
+			
+	}
+
+	void handle_post()
+	{
+
+	}
+
+	void handle_put()
+	{
+
 	}
 
 	void handle_write()
