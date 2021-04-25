@@ -203,7 +203,7 @@ private:
 					c = '\\';
 			if (path.back() == '\\')
 			{
-				path = "index.html";
+				path = "index.html" ;
 				return path;
 			}
 
