@@ -46,16 +46,16 @@ public:
 			});
 		/*read_client();*/
 	}
-	~session() { 
-		beast::close_socket(beast::get_lowest_layer(stream_));
-		//stream_.async_shutdown([](error_code ec) 
-		//	{
-		//		if (ec != boost::asio::ssl::error::stream_truncated)
-		//		{
-		//			std::cout << ec.message() << std::endl;
-		//			/*throw boost::system::system_error{ ec };*/
-		//		}
-		//	});
+	void close() { 
+		beast::get_lowest_layer(stream_).expires_after(std::chrono::seconds(30));
+		stream_.async_shutdown([self=shared_from_this()](error_code ec) 
+			{
+				if (ec == boost::asio::ssl::error::stream_truncated)
+				{
+					return;
+				}
+				std::cout << ec.message() << std::endl;
+			});
 	};
 private:
 
@@ -65,7 +65,7 @@ private:
 		stream_.async_handshake(ssl::stream_base::server, 
 				[self=shared_from_this()](error_code ec) 
 				{
-				self->ec = ec;
+				self->ec_ = ec;
 				if (ec) {
 					//std::cout << "error handshake\n";
 				}
@@ -80,25 +80,25 @@ private:
 	{
 		try{
 ;			std::cout << "Reading Client\n";
-			request_ = {};
-			http::async_read(stream_,flatbuf_,request_, [self=shared_from_this()](error_code ec,std::size_t bytes_transferred) {
-					self->ec = ec;
-					//std::cout << self->request_<<" "<<bytes_transferred;
-					if (ec == http::error::end_of_stream)
-					{
-						
+request_ = {};
+http::async_read(stream_, flatbuf_, request_, [self = shared_from_this()](error_code ec, std::size_t bytes_transferred) {
+	self->ec_ = ec;
+	//std::cout << self->request_<<" "<<bytes_transferred;
+	if (ec == http::error::end_of_stream)
+	{
+		self->close();
+	}
 
-					}
-					self->handle_read();
-					//self->write_client();
-				});
+	self->handle_read();
+	//self->write_client();
+});
 		}
 		catch (const boost::system::system_error& ec)
 		{
 			//std::cout << "\n\nstart_accept: " << ec.what();
 			if (ec.code() == boost::asio::error::connection_aborted)
 			{
-				
+
 			}
 		}
 	}
@@ -107,36 +107,156 @@ private:
 	{
 
 		switch (request_.method())
-		{			
-			case http::verb::get:
-				{
-					std::cout << "GET request!";
-					//handle_get();
-					
+		{
+		case http::verb::get:
+		{
+			std::cout << "GET request!";
+			handle_get();
 
-					break;
-				};
-			case http::verb::post:
-				{
-					std::cout << "POST request!";
-					handle_post();
-					break;
-				};
-			case http::verb::put:
-				{
-					std::cout << "POST request!";
-					handle_put();
-					break;
-				};
-			default :
-				break;
+			break;
+		};
+		case http::verb::post:
+		{
+			std::cout << "POST request!";
+			handle_post();
+			break;
+		};
+		case http::verb::put:
+		{
+			std::cout << "PUT request!";
+			handle_put();
+			break;
+		};
+		default:
+			break;
 		}
-		write_client();
+		//write_client();
 	}
+
+	std::string get_path()
+	{
+
+	}
+
+	bool check_request()
+	{
+		// check target string
+		if (request_.target().empty() ||
+			request_.target().front() != '/' ||
+			request_.target().find("..") != beast::string_view::npos)
+		{
+			error_msg = {};
+			error_msg.append("target error");
+			return false;
+		}
+		else {
+			return true;
+		}
+
+	}
+
+	http::response<http::string_body>&& handle_bad_request()
+	{
+		http::response<http::string_body> response{ http::status::bad_request,
+			request_.version() };
+		response.set(http::field::server, "Myserver");
+		response.set(http::field::content_type, "text/html");
+		response.keep_alive(request_.keep_alive());
+		response.body() = error_msg;
+		response.prepare_payload();
+		return std::move(response);
+	}
+	http::response<http::string_body> handle_not_found()
+	{
+		http::response<http::string_body>response{ http::status::not_found,
+			request_.version() };
+		response.set(http::field::server, "Myserver");
+		response.set(http::field::content_type, "text/html");
+		response.keep_alive(request_.keep_alive());
+		response.body() = error_msg;
+		response.prepare_payload();
+		return std::move(response);
+	}
+
+	http::response<http::string_body> handle_unknown_error() {
+		http::response < http::string_body> response{
+			http::status::internal_server_error,
+			request_.version() };
+		response.set(http::field::server, "Myserver");
+		response.set(http::field::content_type, "text/html");
+		response.keep_alive(request_.keep_alive());
+		response.body() = error_msg;
+		response.prepare_payload();
+		return std::move(response);
+	}
+
+	std::string create_item_path(beast::string_view item)
+	{
+		std::string path{"BanglaSketch"};
+		if (item == "/" || item=="/home") {
+			path = "BanglaSketch\\index.html";
+		}
+		else {
+
+			path.append(item.data(), item.size());
+			for (auto& c : path)
+				if (c == '/')
+					c = '\\';
+			if (path.back() == '\\')
+			{
+				path = "BanglaSketch\\index.html";
+				return path;
+			}
+
+		}
+		return path;
+	}
+
 
 	void handle_get()
 	{
-			
+
+		if (!check_request())
+		{
+			handle_write(std::move(handle_bad_request()));
+			return;
+		}
+
+		/*beast::error_code ec;*/
+		http::file_body::value_type body;
+		/*auto path_res {std::move(create_item_path(request_.target()))};
+		*/
+		std::cout << "path_res: " << create_item_path(request_.target()).c_str() << "\n";
+		body.open(create_item_path(request_.target()).c_str(), beast::file_mode::scan, ec_); // fix file uri
+
+		if (ec_ == beast::errc::no_such_file_or_directory) {
+			error_msg = {};
+			error_msg = "Nothing is here yet! \n come back later ";
+			auto ret_ = handle_not_found();
+			handle_write(std::move(ret_));
+			return;
+		};
+
+		if (ec_)
+		{
+			error_msg = {};
+			error_msg = ec_.message();
+			auto ret_ = handle_unknown_error();
+			handle_write(std::move(ret_));
+			return;
+		}
+	
+		http::response<http::file_body>response{
+			std::piecewise_construct,
+			std::make_tuple(std::move(body)),
+			std::make_tuple(http::status::ok,request_.version())
+		};
+		response.set(http::field::server, "Myserver");
+		response.set(http::field::content_type, "text/html");
+		response.content_length(body.size());
+		response.keep_alive(request_.keep_alive());
+		handle_write(std::move(response));
+		return;
 	}
 
 	void handle_post()
@@ -149,11 +269,14 @@ private:
 
 	}
 
-	void handle_write()
+	void handle_write(http::response<http::file_body>&& res_)
 	{
-
+		http::write(stream_, res_, ec_);
 	}
-
+	void handle_write(http::response<http::string_body>&& res_)
+	{
+		http::write(stream_,std::move(res_), ec_);
+	}
 	void write_client()
 	{
 		try {
@@ -172,7 +295,7 @@ private:
 			res_.content_length(size);
 			res_.keep_alive(request_.keep_alive());
 			
-			http::write(stream_, res_, ec);
+			http::write(stream_, res_, ec_);
 			/*http::async_write(stream_, res_, [self=shared_from_this()](error_code ec,std::size_t bytes_transferred) {
 					
 					self -> ec = ec;
@@ -192,9 +315,10 @@ private:
 	
 private:
 	beast::flat_buffer flatbuf_;
-	boost::beast::error_code ec;
+	boost::beast::error_code ec_;
 	beast::ssl_stream<beast::tcp_stream>stream_;
 	http::request<http::string_body> request_;
+	std::string error_msg;
 };
 
 class server :public  std::enable_shared_from_this<server>
