@@ -3,3 +3,4 @@ Release
 x64
 TCPServer.vcxproj
 TCPServer.vcxproj.filters
+TCPServer.vcxproj.user
