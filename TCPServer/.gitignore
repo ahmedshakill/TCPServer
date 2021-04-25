@@ -1,6 +1,6 @@
 Debug
 Release
 x64
-TCPServer.vcxproj
-TCPServer.vcxproj.filters
-TCPServer.vcxproj.user
+TCPServer/TCPServer.vcxproj
+TCPServer/TCPServer.vcxproj.filters
+TCPServer/TCPServer.vcxproj.user
