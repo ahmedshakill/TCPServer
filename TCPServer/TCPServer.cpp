@@ -79,25 +79,26 @@ private:
 	void read_client()
 	{
 	try{
-		std::cout << "Reading Client\n";
-		request_ = {};
-		http::async_read(stream_, flatbuf_, request_, [self = shared_from_this()](error_code ec, std::size_t bytes_transferred) {
-				self->ec_ = ec;
-				//std::cout << self->request_<<" "<<bytes_transferred;
-				if (ec == http::error::end_of_stream)
-				{
-					self->close();
-				}
+			std::cout << "Reading Client\n";
+			request_ = {};
+			http::async_read(stream_, flatbuf_, request_, [self = shared_from_this()](error_code ec, std::size_t bytes_transferred) {
+			self->ec_ = ec;
+			//std::cout << self->request_<<" "<<bytes_transferred;
+			if (ec == http::error::end_of_stream)
+			{
+				self->close();
+			}
 
-				self->handle_read();
-				//self->write_client();
-			});
-		}
+			self->handle_read();
+			//self->write_client();
+		});
+	}
 		catch (const boost::system::system_error& ec)
 		{
+			//std::cout << "\n\nstart_accept: " << ec.what();
 			if (ec.code() == boost::asio::error::connection_aborted)
 			{
-				std::cout << "\nclient closed connection \n" ;
+
 			}
 		}
 	}
@@ -191,9 +192,9 @@ private:
 
 	std::string create_item_path(beast::string_view item)
 	{
-		std::string path {};
+		std::string path{"BanglaSketch"};
 		if (item == "/" || item=="/home") {
-			path = "index.html";
+			path = "BanglaSketch\\index.html";
 		}
 		else {
 
@@ -203,7 +204,7 @@ private:
 					c = '\\';
 			if (path.back() == '\\')
 			{
-				path = "index.html";
+				path = "BanglaSketch\\index.html";
 				return path;
 			}
 
