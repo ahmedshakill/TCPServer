@@ -192,9 +192,9 @@ private:
 
 	std::string create_item_path(beast::string_view item)
 	{
-		std::string path{"BanglaSketch"};
+		std::string path{};
 		if (item == "/" || item=="/home") {
-			path = "BanglaSketch\\index.html";
+			path = "index.html";
 		}
 		else {
 
@@ -204,7 +204,7 @@ private:
 					c = '\\';
 			if (path.back() == '\\')
 			{
-				path = "BanglaSketch\\index.html";
+				path = "index.html";
 				return path;
 			}
 
