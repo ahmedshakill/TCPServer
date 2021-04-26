@@ -1,5 +1,5 @@
 #define _WIN32_WINNT 0xA000006
-
+#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <optional>
 #include <boost/asio.hpp>
@@ -103,6 +103,30 @@ private:
 		}
 	}
 
+
+	/*this method is taken from here https://stackoverflow.com/a/29962178/12217229*/
+	std::string urldecode(std::string str) {
+		std::string result;
+		char ch;
+		int i, j, len = str.length();
+
+		for (i = 0; i < len; i++) {
+			if (str[i] != '%') {
+				if (str[i] == '+')
+					result += ' ';
+				else
+					result += str[i];
+			}
+			else {
+				sscanf_s(str.substr(i + 1, 2).c_str(), "%x", &j);
+				ch = static_cast<char>(j);
+				result += ch;
+				i = i + 2;
+			}
+		}
+		return result;
+	}
+
 	void handle_read()
 	{
 
@@ -110,20 +134,24 @@ private:
 		{
 		case http::verb::get:
 		{
-			std::cout << "GET request!";
+			std::cout << "GET request!\n";
 			handle_get();
 
 			break;
 		};
 		case http::verb::post:
 		{
-			std::cout << "POST request!";
-			handle_post();
+			std::cout << "POST request!\n";
+			std::cout <<urldecode( request_.body().substr(request_.body().find_first_of("=")+1,request_.body().size()))<<"\n"	;
+			//auto it = request_.find("codeArea");
+
+			std::cout << request_["codeArea"];
+			handle_post(urldecode(request_.body().substr(request_.body().find_first_of("=") + 1, request_.body().size())));
 			break;
 		};
 		case http::verb::put:
 		{
-			std::cout << "PUT request!";
+			std::cout << "PUT request!\n";
 			handle_put();
 			break;
 		};
@@ -133,10 +161,6 @@ private:
 		//write_client();
 	}
 
-	std::string get_path()
-	{
-
-	}
 
 	bool check_request()
 	{
@@ -177,7 +201,6 @@ private:
 		response.prepare_payload();
 		return std::move(response);
 	}
-
 	http::response<http::string_body> handle_unknown_error() {
 		http::response < http::string_body> response{
 			http::status::internal_server_error,
@@ -259,9 +282,15 @@ private:
 		return;
 	}
 
-	void handle_post()
+	void handle_post(std::string str)
 	{
+		std::ostringstream oss(str);
+		oss <<"hello";
+		File open();
 
+		is.open("file.cpp", "wr+");
+
+		return;
 	}
 
 	void handle_put()
@@ -277,8 +306,12 @@ private:
 	{
 		http::write(stream_,std::move(res_), ec_);
 	}
+
+
+
 	void write_client()
 	{
+	
 		try {
 			std::cout << "\nwriting\n";
 			http::string_body::value_type body;

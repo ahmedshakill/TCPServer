@@ -1,17 +1,26 @@
 ﻿<!DOCTYPE html>
- <html>
- <head>
+<html>
+        <!-- JavaScript Bundle with Popper -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js" 
+            integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" 
+            crossorigin="anonymous">
+        </script>
+<head>
 
 <script>
 function getText() {
-    var str=document.getElementById("txtArea").value;
-      document.getElementById('output').innerHTML +=str + " i did it";
- }
- </script>
+        console.log("hello world")
+        var str=document.getElementById("codeArea").value;
+        document.getElementById('output').innerHTML +=str ;
+      }
+</script>
 </head>
 <body>
-<textarea rows="5" cols="30" id = "txtArea"> </textarea>
-<input type = "button" value="click here" onclick = "getText();" />
-<div id="output"></div>
+  <div style="margin: auto;" id="output">
+      <form  action="/compile"  name="input_form" method="post" >        
+          <textarea class="form-control" name="codeArea" id="codeArea" spellcheck="false" style="font-size: 17px;" rows="30" cols="90"  onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'\t'+v.substring(e);this.selectionStart=this.selectionEnd=s+1;return false;}"></textarea>
+          <input type="submit"  />
+        </form>
+    </div>
 </body>
 </html>
