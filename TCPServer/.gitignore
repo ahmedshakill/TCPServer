@@ -4,3 +4,5 @@ x64
 TCPServer.vcxproj
 TCPServer.vcxproj.filters
 TCPServer.vcxproj.user
+code.cpp
+code.exe

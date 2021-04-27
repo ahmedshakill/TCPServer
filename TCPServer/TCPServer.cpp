@@ -1,6 +1,7 @@
 #define _WIN32_WINNT 0xA000006
 #define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
+#include <fstream>
 #include <optional>
 #include <boost/asio.hpp>
 #include <boost/config.hpp>
@@ -12,7 +13,7 @@
 #include <boost/exception/all.hpp>
 #include <boost/filesystem.hpp>
 #include "server_certificate.hpp"
-//#include "json.hpp"
+#include "json.hpp"
 //#include "inja.hpp"
 
 //using namespace std;
@@ -104,28 +105,6 @@ private:
 	}
 
 
-	/*this method is taken from here https://stackoverflow.com/a/29962178/12217229*/
-	std::string urldecode(std::string str) {
-		std::string result;
-		char ch;
-		int i, j, len = str.length();
-
-		for (i = 0; i < len; i++) {
-			if (str[i] != '%') {
-				if (str[i] == '+')
-					result += ' ';
-				else
-					result += str[i];
-			}
-			else {
-				sscanf_s(str.substr(i + 1, 2).c_str(), "%x", &j);
-				ch = static_cast<char>(j);
-				result += ch;
-				i = i + 2;
-			}
-		}
-		return result;
-	}
 
 	void handle_read()
 	{
@@ -141,12 +120,9 @@ private:
 		};
 		case http::verb::post:
 		{
-			std::cout << "POST request!\n";
-			std::cout <<urldecode( request_.body().substr(request_.body().find_first_of("=")+1,request_.body().size()))<<"\n"	;
-			//auto it = request_.find("codeArea");
-
-			std::cout << request_["codeArea"];
-			handle_post(urldecode(request_.body().substr(request_.body().find_first_of("=") + 1, request_.body().size())));
+			std::cout << "POST request!\n";		
+			std::cout << request_.body()<<"\n";
+			handle_post(request_.body());
 			break;
 		};
 		case http::verb::put:
@@ -284,12 +260,44 @@ private:
 
 	void handle_post(std::string str)
 	{
-		std::ostringstream oss(str);
+		/*std::ostringstream oss(str);
 		oss <<"hello";
-		File open();
+		
+		std::cout << oss.str();*/
+		
+		// write to filesystem
+		std::string filename = "code.cpp";
+		
+		std::ofstream os(filename, std::ios::out);
+		os << str;
+		os.close();
 
-		is.open("file.cpp", "wr+");
+		std::FILE* fp;
+		/*system("cd");
+		system("dir");*/
+		system("g++ -std=c++17 ./code.cpp -o code.exe");
+		fp = _popen("code.exe ","rt");
 
+		std::string result{};
+		char tempbuf_[128];
+		while (fgets(tempbuf_, 128, fp)) {
+			result += tempbuf_;
+		}
+		//std::cout << result << std::endl;
+		
+		nlohmann::json data;
+		data["output"] = result.c_str();
+
+		std::cout << data.dump()<<"\n";
+
+		http::response<http::string_body>response{ http::status::ok,
+			request_.version() };
+		response.set(http::field::server, "Myserver");
+		response.set(http::field::content_type, "application/json");
+		response.keep_alive(request_.keep_alive());
+		response.body() = data.dump();/*"{ \"output\" : \""+result+"\"}";*/
+		response.prepare_payload();
+		handle_write(std::move(response));
 		return;
 	}
 
