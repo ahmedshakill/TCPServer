@@ -1,6 +1,5 @@
-#define _WIN32_WINNT 0xA000006
-
 #include <iostream>
+#include <fstream>
 #include <optional>
 #include <boost/asio.hpp>
 #include <boost/config.hpp>
@@ -12,7 +11,7 @@
 #include <boost/exception/all.hpp>
 #include <boost/filesystem.hpp>
 #include "server_certificate.hpp"
-//#include "json.hpp"
+#include "json.hpp"
 //#include "inja.hpp"
 
 //using namespace std;
@@ -103,6 +102,8 @@ private:
 		}
 	}
 
+
+
 	void handle_read()
 	{
 
@@ -110,20 +111,21 @@ private:
 		{
 		case http::verb::get:
 		{
-			std::cout << "GET request!";
+			std::cout << "GET request!\n";
 			handle_get();
 
 			break;
 		};
 		case http::verb::post:
 		{
-			std::cout << "POST request!";
-			handle_post();
+			std::cout << "POST request!\n";		
+			std::cout << request_.body()<<"\n";
+			handle_post(request_.body());
 			break;
 		};
 		case http::verb::put:
 		{
-			std::cout << "PUT request!";
+			std::cout << "PUT request!\n";
 			handle_put();
 			break;
 		};
@@ -133,10 +135,6 @@ private:
 		//write_client();
 	}
 
-	std::string get_path()
-	{
-
-	}
 
 	bool check_request()
 	{
@@ -155,7 +153,7 @@ private:
 
 	}
 
-	http::response<http::string_body>&& handle_bad_request()
+	http::response<http::string_body> handle_bad_request()
 	{
 		http::response<http::string_body> response{ http::status::bad_request,
 			request_.version() };
@@ -177,7 +175,6 @@ private:
 		response.prepare_payload();
 		return std::move(response);
 	}
-
 	http::response<http::string_body> handle_unknown_error() {
 		http::response < http::string_body> response{
 			http::status::internal_server_error,
@@ -198,10 +195,10 @@ private:
 		}
 		else {
 
-			path.append(item.data(), item.size());
+			/*path.append(item.data(), item.size());
 			for (auto& c : path)
 				if (c == '/')
-					c = '\\';
+					c = '\\';*/
 			if (path.back() == '\\')
 			{
 				path = "index.html";
@@ -259,9 +256,47 @@ private:
 		return;
 	}
 
-	void handle_post()
+	void handle_post(std::string str)
 	{
+		/*std::ostringstream oss(str);
+		oss <<"hello";
+		
+		std::cout << oss.str();*/
+		
+		// write to filesystem
+		std::string filename = "code.cpp";
+		
+		std::ofstream os(filename, std::ios::out);
+		os << str;
+		os.close();
 
+		std::FILE* fp;
+		/*system("cd");
+		system("dir");*/
+		system("g++ -std=c++17 ./code.cpp -o code");
+		fp = popen("./code ","rt");
+
+		std::string result{};
+		char tempbuf_[128];
+		while (fgets(tempbuf_, 128, fp)) {
+			result += tempbuf_;
+		}
+		//std::cout << result << std::endl;
+		
+		nlohmann::json data;
+		data["output"] = result.c_str();
+
+		std::cout << data.dump()<<"\n";
+
+		http::response<http::string_body>response{ http::status::ok,
+			request_.version() };
+		response.set(http::field::server, "Myserver");
+		response.set(http::field::content_type, "application/json");
+		response.keep_alive(request_.keep_alive());
+		response.body() = data.dump();/*"{ \"output\" : \""+result+"\"}";*/
+		response.prepare_payload();
+		handle_write(std::move(response));
+		return;
 	}
 
 	void handle_put()
@@ -277,8 +312,12 @@ private:
 	{
 		http::write(stream_,std::move(res_), ec_);
 	}
+
+
+
 	void write_client()
 	{
+	
 		try {
 			std::cout << "\nwriting\n";
 			http::string_body::value_type body;
@@ -324,10 +363,12 @@ private:
 class server :public  std::enable_shared_from_this<server>
 {
 public:
-	server(io::io_context& io_context)
+	server(io::io_context& io_context,short unsigned int port)
 		: io_context_(io_context),
-		acceptor_(io_context, tcp::endpoint{ io::ip::make_address("127.0.0.1"),8080 })
+		port_(port),
+		acceptor_(io_context, tcp::endpoint{ io::ip::make_address("0.0.0.0"),port_ })
 	{
+		std::cout<<"server constructor\n";
 		error_code ec;
 		acceptor_.listen(io::socket_base::max_listen_connections, ec);
 		check("error listenning\n")
@@ -341,13 +382,13 @@ public:
 	
 	void start_accept()
 	{
+			std::cout << "\n Accept new connection\n";
 		// The new connection gets its own strand
 		/*socket.emplace(io::make_strand(io_context_));*/
 		//std::shared_ptr<tcp::socket> socket(new tcp::socket(io::make_strand(io_context_)));
 		acceptor_.async_accept(
 			[self=shared_from_this()](error_code ec,tcp::socket&& socket) {
 			check("error accepting connection\n")
-			//std::cout << "\nnew connection\n";
 			try
 			{
 				std::make_shared<session>(self->ctx_, std::move((socket)))->serve_client(); 
@@ -364,16 +405,26 @@ private:
 	io::io_context& io_context_;
 	ssl::context ctx_{ ssl::context::tlsv13 };
 	tcp::acceptor acceptor_;
-	tcp::endpoint endpoint_{ io::ip::make_address("127.0.0.1"),8080 };
+	short unsigned int port_;
+	tcp::endpoint endpoint_{ io::ip::make_address("0.0.0.0"),port_ };
 	//std::optional<tcp::socket> socket;
 };
 
 int main(int argc, char* argv[])
 {
+	std::cout<<"Welcome \n";
 	try
 	{
+		char* port_p=std::getenv("PORT");
+        short unsigned int port;
+		if(!port_p){
+		    port=8080;
+		}
+		else{
+		    port=atoi(port_p);
+		}
 		io::io_context io_context;
-		std::make_shared<server>(io_context)->start();
+		std::make_shared<server>(io_context,port)->start();
 		io_context.run();
 		return 0;
 	}

@@ -1,7 +1,7 @@
 # We chose Alpine to build the image because it has good support for creating
 # statically-linked, small programs.
 ARG DISTRO_VERSION=edge
-FROM alpine:${DISTRO_VERSION} AS base
+FROM frolvlad/alpine-glibc AS base
 
 # Create separate targets for each phase, this allows us to cache intermediate
 # stages when using Google Cloud Build, and makes the final deployment stage
@@ -20,6 +20,7 @@ RUN apk update && \
         cmake \
         git \
         gcc \
+        glibc\
         g++ \
         libc-dev \
         nghttp2-static \
@@ -43,15 +44,19 @@ RUN cmake -S/v/source -B/v/binary -GNinja \
 
 # Compile the binary and strip it to reduce its size.
 RUN cmake --build /v/binary
-RUN strip /v/binary/cloud_run_hello
+COPY ./index.html /v/binary
+RUN strip /v/binary/TCPServer
+RUN ls /v/binary
 
 # Create the final deployment image, using `scratch` (the empty Docker image)
 # as the starting point. Effectively we create an image that only contains
 # our program.
-FROM scratch AS cloud-run-hello
+FROM base AS TCPServer
 WORKDIR /r
 
 # Copy the program from the previously created stage and make it the entry point.
-COPY --from=build /v/binary/cloud_run_hello /r
+COPY --from=build /v/binary/TCPServer /r
+COPY --from=build /v/binary/index.html /r
 
-ENTRYPOINT [ "/r/cloud_run_hello" ]
+ENTRYPOINT [ "/r/TCPServer" ]
+EXPOSE $PORT
