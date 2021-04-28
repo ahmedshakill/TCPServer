@@ -271,8 +271,7 @@ private:
 		os.close();
 
 		std::FILE* fp;
-		/*system("cd");
-		system("dir");*/
+
 		system("g++ -std=c++17 ./code.cpp -o code");
 		fp = popen("./code ","rt");
 
@@ -406,8 +405,7 @@ private:
 	ssl::context ctx_{ ssl::context::tlsv13 };
 	tcp::acceptor acceptor_;
 	short unsigned int port_;
-	tcp::endpoint endpoint_{ io::ip::make_address("0.0.0.0"),port_ };
-	//std::optional<tcp::socket> socket;
+
 };
 
 int main(int argc, char* argv[])
