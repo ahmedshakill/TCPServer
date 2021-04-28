@@ -1,5 +1,5 @@
-#define _WIN32_WINNT 0xA000006
-#define _CRT_SECURE_NO_WARNINGS
+//#define _WIN32_WINNT 0xA000006
+//#define _CRT_SECURE_NO_WARNINGS
 #include <iostream>
 #include <fstream>
 #include <optional>
@@ -195,10 +195,12 @@ private:
 		}
 		else {
 
-			path.append(item.data(), item.size());
+			/*
+                       path.append(item.data(), item.size());
 			for (auto& c : path)
 				if (c == '/')
 					c = '\\';
+                       */
 			if (path.back() == '\\')
 			{
 				path = "index.html";
@@ -274,7 +276,7 @@ private:
 		/*system("cd");
 		system("dir");*/
 		system("g++ -std=c++17 ./code.cpp -o code.exe");
-		fp = _popen("code.exe ","rt");
+		fp = popen("code.exe ","rt");
 
 		std::string result{};
 		char tempbuf_[128];
@@ -327,7 +329,7 @@ class server :public  std::enable_shared_from_this<server>
 public:
 	server(io::io_context& io_context)
 		: io_context_(io_context),
-		acceptor_(io_context, tcp::endpoint{ io::ip::make_address("127.0.0.1"),8080 })
+		acceptor_(io_context, tcp::endpoint{ io::ip::make_address("0.0.0.0"),8080 })
 	{
 		error_code ec;
 		acceptor_.listen(io::socket_base::max_listen_connections, ec);
@@ -365,7 +367,7 @@ private:
 	io::io_context& io_context_;
 	ssl::context ctx_{ ssl::context::tlsv13 };
 	tcp::acceptor acceptor_;
-	tcp::endpoint endpoint_{ io::ip::make_address("127.0.0.1"),8080 };
+	tcp::endpoint endpoint_{ io::ip::make_address("0.0.0.0"),8080 };
 	//std::optional<tcp::socket> socket;
 };
 
