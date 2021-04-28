@@ -1,7 +1,0 @@
-[
-{
-  "directory": "/home/kingpin/Code/CPP/TCPServer/build",
-  "command": "/usr/bin/g++-10 -DBOOST_ALL_NO_LIB -DBOOST_DATE_TIME_DYN_LINK -DBOOST_PROGRAM_OPTIONS_DYN_LINK -DBOOST_REGEX_DYN_LINK -I/usr/local/include/boost -g -std=gnu++17 -o CMakeFiles/TCPServer.dir/TCPServer/TCPServer.cpp.o -c /home/kingpin/Code/CPP/TCPServer/TCPServer/TCPServer.cpp",
-  "file": "/home/kingpin/Code/CPP/TCPServer/TCPServer/TCPServer.cpp"
-}
-]

@@ -1,7 +1,0 @@
-/home/kingpin/Code/CPP/TCPServer/build/CMakeFiles/install/strip.dir
-/home/kingpin/Code/CPP/TCPServer/build/CMakeFiles/edit_cache.dir
-/home/kingpin/Code/CPP/TCPServer/build/CMakeFiles/TCPServer.dir
-/home/kingpin/Code/CPP/TCPServer/build/CMakeFiles/rebuild_cache.dir
-/home/kingpin/Code/CPP/TCPServer/build/CMakeFiles/list_install_components.dir
-/home/kingpin/Code/CPP/TCPServer/build/CMakeFiles/install/local.dir
-/home/kingpin/Code/CPP/TCPServer/build/CMakeFiles/install.dir
