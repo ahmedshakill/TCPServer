@@ -1,0 +1,1 @@
+/usr/bin/g++-10 -g CMakeFiles/TCPServer.dir/TCPServer/TCPServer.cpp.o -o TCPServer  -Wl,-rpath,/usr/local/lib: /usr/local/lib/libboost_program_options.so.1.75.0 /usr/local/lib/libboost_date_time.so.1.75.0 /usr/local/lib/libboost_regex.so.1.75.0 -lssl -lcrypto -lpthread 
