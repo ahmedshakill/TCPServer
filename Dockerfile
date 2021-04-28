@@ -51,12 +51,20 @@ RUN ls /v/binary
 # Create the final deployment image, using `scratch` (the empty Docker image)
 # as the starting point. Effectively we create an image that only contains
 # our program.
-FROM base AS TCPServer
+FROM devtools AS TCPServer
 WORKDIR /r
+
+
 
 # Copy the program from the previously created stage and make it the entry point.
 COPY --from=build /v/binary/TCPServer /r
 COPY --from=build /v/binary/index.html /r
 
+RUN apk update && \
+    apk add \
+    gcc \
+    glibc\
+    g++ \
+    libc-dev 
 ENTRYPOINT [ "/r/TCPServer" ]
 EXPOSE $PORT
