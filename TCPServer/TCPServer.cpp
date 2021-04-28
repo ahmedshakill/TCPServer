@@ -91,7 +91,6 @@ private:
 			}
 
 			self->handle_read();
-			//self->write_client();
 		});
 	}
 		catch (const boost::system::system_error& ec)
@@ -134,7 +133,6 @@ private:
 		default:
 			break;
 		}
-		//write_client();
 	}
 
 
@@ -315,45 +313,6 @@ private:
 		http::write(stream_,std::move(res_), ec_);
 	}
 
-
-
-	void write_client()
-	{
-	
-		try {
-			std::cout << "\nwriting\n";
-			http::string_body::value_type body;
-			body.append("<html><body>hello world<a href=""https://www.w3schools.com"">Visit W3Schools</a>\
-								<input type=""text"" id=""name:"" name=""name"" required\
-								minlength = ""4"" maxlength = ""8"" size = ""10"" > </body></html>");
-			auto const size = body.size();
-			http::response<http::string_body> res_{
-			std::piecewise_construct,
-			std::make_tuple(std::move(body)),
-			std::make_tuple(http::status::ok, request_.version()) };
-			res_.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-			res_.set(http::field::content_type, "text / html");
-			res_.content_length(size);
-			res_.keep_alive(request_.keep_alive());
-			
-			http::write(stream_, res_, ec_);
-			/*http::async_write(stream_, res_, [self=shared_from_this()](error_code ec,std::size_t bytes_transferred) {
-					
-					self -> ec = ec;
-					self->read_client();
-				});*/
-		}
-		catch (const boost::system::system_error& ec)
-		{
-			std::cout << "\nstart_accept: " << ec.what();
-		}
-		catch (const std::exception& e)
-		{
-			
-			std::cout << "\nsfskladf " << e.what();
-		}
-	}
-	
 private:
 	beast::flat_buffer flatbuf_;
 	boost::beast::error_code ec_;
@@ -382,9 +341,7 @@ public:
 	
 	void start_accept()
 	{
-		// The new connection gets its own strand
-		/*socket.emplace(io::make_strand(io_context_));*/
-		//std::shared_ptr<tcp::socket> socket(new tcp::socket(io::make_strand(io_context_)));
+		
 		acceptor_.async_accept(
 			[self=shared_from_this()](error_code ec,tcp::socket&& socket) {
 			check("error accepting connection\n")
@@ -406,7 +363,6 @@ private:
 	ssl::context ctx_{ ssl::context::tlsv13 };
 	tcp::acceptor acceptor_;
 	tcp::endpoint endpoint_{ io::ip::make_address("127.0.0.1"),8080 };
-	//std::optional<tcp::socket> socket;
 };
 
 int main(int argc, char* argv[])
