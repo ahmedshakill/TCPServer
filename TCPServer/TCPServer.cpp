@@ -91,7 +91,6 @@ private:
 			}
 
 			self->handle_read();
-			//self->write_client();
 		});
 	}
 		catch (const boost::system::system_error& ec)
@@ -134,7 +133,6 @@ private:
 		default:
 			break;
 		}
-		//write_client();
 	}
 
 
@@ -315,44 +313,6 @@ private:
 		http::write(stream_,std::move(res_), ec_);
 	}
 
-
-
-	void write_client()
-	{
-	
-		try {
-			std::cout << "\nwriting\n";
-			http::string_body::value_type body;
-			body.append("<html><body>hello world<a href=""https://www.w3schools.com"">Visit W3Schools</a>\
-								<input type=""text"" id=""name:"" name=""name"" required\
-								minlength = ""4"" maxlength = ""8"" size = ""10"" > </body></html>");
-			auto const size = body.size();
-			http::response<http::string_body> res_{
-			std::piecewise_construct,
-			std::make_tuple(std::move(body)),
-			std::make_tuple(http::status::ok, request_.version()) };
-			res_.set(http::field::server, BOOST_BEAST_VERSION_STRING);
-			res_.set(http::field::content_type, "text / html");
-			res_.content_length(size);
-			res_.keep_alive(request_.keep_alive());
-			
-			http::write(stream_, res_, ec_);
-			/*http::async_write(stream_, res_, [self=shared_from_this()](error_code ec,std::size_t bytes_transferred) {
-					
-					self -> ec = ec;
-					self->read_client();
-				});*/
-		}
-		catch (const boost::system::system_error& ec)
-		{
-			std::cout << "\nstart_accept: " << ec.what();
-		}
-		catch (const std::exception& e)
-		{
-			
-			std::cout << "\nsfskladf " << e.what();
-		}
-	}
 	
 private:
 	beast::flat_buffer flatbuf_;
