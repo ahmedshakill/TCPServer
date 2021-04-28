@@ -1,6 +1,7 @@
 Instructions
 
-cd into the directory where the Dockerfile is located
+cd into this directory [where the Dockerfile is located]
+
 then
 
 1)     docker build .
