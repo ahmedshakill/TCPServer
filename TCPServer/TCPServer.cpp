@@ -14,7 +14,6 @@
 #include <boost/filesystem.hpp>
 #include "server_certificate.hpp"
 #include "json.hpp"
-
 //#include "inja.hpp"
 
 //using namespace std;
@@ -380,6 +379,7 @@ public:
 		: io_context_(io_context),
 		acceptor_(io_context, tcp::endpoint{ io::ip::make_address("0.0.0.0"),port })
 	{
+		std::cout<<"server constructor\n";
 		error_code ec;
 		acceptor_.listen(io::socket_base::max_listen_connections, ec);
 		check("error listenning\n")
@@ -393,13 +393,13 @@ public:
 	
 	void start_accept()
 	{
+			std::cout << "\n Accept new connection\n";
 		// The new connection gets its own strand
 		/*socket.emplace(io::make_strand(io_context_));*/
 		//std::shared_ptr<tcp::socket> socket(new tcp::socket(io::make_strand(io_context_)));
 		acceptor_.async_accept(
 			[self=shared_from_this()](error_code ec,tcp::socket&& socket) {
 			check("error accepting connection\n")
-			//std::cout << "\nnew connection\n";
 			try
 			{
 				std::make_shared<session>(std::move((socket)))->serve_client(); 
@@ -420,6 +420,7 @@ private:
 
 int main(int argc, char* argv[])
 {
+	std::cout<<"Welcome \n";
 	try
 	{
 		char* port_p=std::getenv("PORT");

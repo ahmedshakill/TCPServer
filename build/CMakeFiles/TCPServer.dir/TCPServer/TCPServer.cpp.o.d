@@ -143,11 +143,15 @@ CMakeFiles/TCPServer.dir/TCPServer/TCPServer.cpp.o: \
  /usr/include/c++/10/bits/locale_facets.tcc \
  /usr/include/c++/10/bits/basic_ios.tcc \
  /usr/include/c++/10/bits/ostream.tcc /usr/include/c++/10/istream \
+<<<<<<< HEAD
  /usr/include/c++/10/bits/istream.tcc /usr/include/c++/10/fstream \
  /usr/include/c++/10/bits/codecvt.h \
  /usr/include/x86_64-linux-gnu/c++/10/bits/basic_file.h \
  /usr/include/x86_64-linux-gnu/c++/10/bits/c++io.h \
  /usr/include/c++/10/bits/fstream.tcc /usr/include/c++/10/optional \
+=======
+ /usr/include/c++/10/bits/istream.tcc /usr/include/c++/10/optional \
+>>>>>>> heroku
  /usr/include/c++/10/utility /usr/include/c++/10/bits/stl_relops.h \
  /usr/include/c++/10/bits/enable_special_members.h \
  /usr/local/include/boost/asio.hpp \
@@ -1703,7 +1707,12 @@ CMakeFiles/TCPServer.dir/TCPServer/TCPServer.cpp.o: \
  /usr/include/c++/10/bits/locale_facets_nonio.h \
  /usr/include/x86_64-linux-gnu/c++/10/bits/time_members.h \
  /usr/include/x86_64-linux-gnu/c++/10/bits/messages_members.h \
+<<<<<<< HEAD
  /usr/include/libintl.h /usr/include/c++/10/bits/locale_facets_nonio.tcc \
+=======
+ /usr/include/libintl.h /usr/include/c++/10/bits/codecvt.h \
+ /usr/include/c++/10/bits/locale_facets_nonio.tcc \
+>>>>>>> heroku
  /usr/include/c++/10/bits/locale_conv.h \
  /usr/include/c++/10/bits/quoted_string.h \
  /usr/local/include/boost/exception/current_exception_cast.hpp \
@@ -1798,6 +1807,7 @@ CMakeFiles/TCPServer.dir/TCPServer/TCPServer.cpp.o: \
  /usr/local/include/boost/filesystem/convenience.hpp \
  /usr/local/include/boost/filesystem/string_file.hpp \
  /usr/local/include/boost/filesystem/fstream.hpp \
+<<<<<<< HEAD
  /home/kingpin/Code/CPP/TCPServer/TCPServer/server_certificate.hpp \
  /home/kingpin/Code/CPP/TCPServer/TCPServer/json.hpp \
  /usr/include/c++/10/numeric /usr/include/c++/10/bits/stl_numeric.h \
@@ -1813,3 +1823,10 @@ CMakeFiles/TCPServer.dir/TCPServer/TCPServer.cpp.o: \
  /usr/include/c++/10/bits/gslice_array.h \
  /usr/include/c++/10/bits/mask_array.h \
  /usr/include/c++/10/bits/indirect_array.h
+=======
+ /usr/include/c++/10/fstream \
+ /usr/include/x86_64-linux-gnu/c++/10/bits/basic_file.h \
+ /usr/include/x86_64-linux-gnu/c++/10/bits/c++io.h \
+ /usr/include/c++/10/bits/fstream.tcc \
+ /home/kingpin/Code/CPP/TCPServer/TCPServer/server_certificate.hpp
+>>>>>>> heroku

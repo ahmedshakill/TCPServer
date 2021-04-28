@@ -5,6 +5,7 @@
             integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf" 
             crossorigin="anonymous">
         </script>
+<<<<<<< HEAD
 
         
 <head>
@@ -103,5 +104,24 @@ int main()
         </div>
     </div>
 
+=======
+<head>
+
+<script>
+function getText() {
+        console.log("hello world")
+        var str=document.getElementById("codeArea").value;
+        document.getElementById('output').innerHTML +=str ;
+      }
+</script>
+</head>
+<body>
+  <div style="margin: auto;" id="output">
+      <form  action="/compile"  name="input_form" method="post" >        
+          <textarea class="form-control" name="codeArea" id="codeArea" spellcheck="false" style="font-size: 17px;" rows="30" cols="90"  onkeydown="if(event.keyCode===9){var v=this.value,s=this.selectionStart,e=this.selectionEnd;this.value=v.substring(0, s)+'\t'+v.substring(e);this.selectionStart=this.selectionEnd=s+1;return false;}"></textarea>
+          <input type="submit"  />
+        </form>
+    </div>
+>>>>>>> heroku
 </body>
 </html>
