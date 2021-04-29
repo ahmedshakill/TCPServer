@@ -8,6 +8,7 @@ then
 
 2)     docker run -p 8080:8080 CONTAINER ID 
 
+  and   visit  https://localhost:8080
+# You get CONTAINER ID from when first command finishes . 
 
-# You get CONTAINER ID from when first command finishes
  
